@@ -2,11 +2,13 @@
 
 """Dump Fleep chat history into JSON file.
 
-Input - config file ~/.fleep/client.ini::
+Input - YAML file ~/.fleep.yml
 
-    [fleep-client]
-    username = xxx
-    password = xxx
+fleep-client:
+  version: 1.0
+  login:
+    username: user@fleep.io
+    password: xxxx
 
 Output: history.json
 
@@ -23,25 +25,24 @@ import hmac
 import stat
 import json
 import socket
-import ConfigParser
+import yaml
 
 from fleepclient.api import FleepApi
 from fleepclient.cache import FleepCache
 
 SERVER = 'https://fleep.io'
-USERNAME = None
-PASSWORD = None
+CONFIG_FILE = "~/.fleep.yml"
 
 def load_config():
     global USERNAME, PASSWORD
-    cfn = os.path.expanduser('~/.fleep/client.ini')
-    s = ConfigParser.SafeConfigParser()
-    s.read([cfn])
-    USERNAME = s.get('fleep-client', 'username')
-    PASSWORD = s.get('fleep-client', 'password')
+    cfn = os.path.expanduser(CONFIG_FILE)
 
     if not USERNAME or not PASSWORD:
-        print 'Please create ~/.fleep/client.ini with username and password.'
+        print(f'Please create ~/.fleep/client.ini with username and password.')
+        sys.exit(1)
+
+    if not USERNAME or not PASSWORD:
+        print('Please create ~/.fleep/client.ini with username and password.')
         sys.exit(1)
 
 def json_encode_stable(data = None, **kwargs):
@@ -54,14 +55,14 @@ def json_encode_stable(data = None, **kwargs):
 def main():
     load_config()
 
-    print 'Login'
+    print('Login')
     fc = FleepCache(SERVER, USERNAME, PASSWORD)
-    print 'Loading contacts'
+    print('Loading contacts')
     fc.contacts.sync_all()
-    print 'Loading conversations'
+    print('Loading conversations')
     for conv_id in fc.conversations:
         conv = fc.conversations[conv_id]
-        print '  %s - %s' % (conv_id, conv.topic)
+        print('  %s - %s' % (conv_id, conv.topic))
         conv.sync_to_first()
     data = {
         'account': {
@@ -89,8 +90,7 @@ def main():
     jsdata = json_encode_stable(data)
     with open(fn, 'w') as f:
         f.write(jsdata)
-    print 'Wrote', fn
+    print('Wrote', fn)
 
 if __name__ == '__main__':
     main()
-
