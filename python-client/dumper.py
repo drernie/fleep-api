@@ -13,6 +13,8 @@ fleep-client:
 Output: history.json
 
 """
+SERVER = 'https://fleep.io'
+CONFIG_FILE = "~/.fleep.yml"
 
 import sys
 import os.path
@@ -26,21 +28,16 @@ import stat
 import json
 import socket
 import yaml
-
 from fleepclient.api import FleepApi
 from fleepclient.cache import FleepCache
-
-SERVER = 'https://fleep.io'
-CONFIG_FILE = "~/.fleep.yml"
 
 def load_config():
     global USERNAME, PASSWORD
     cf_path = os.path.expanduser(CONFIG_FILE)
-    print(cf_path)
+    print(f"Loading configuration from {cf_path}")
     with open(cf_path, 'r') as file:
         cf = yaml.safe_load(file)
-        print(cf)
-    if not cf["login"]:
+    if "login" not in cf:
         print(f'Please create {CONFIG_FILE} with username and password.')
         sys.exit(1)
     return cf["login"]
@@ -55,10 +52,11 @@ def json_encode_stable(data = None, **kwargs):
 def main():
     c = load_config()
 
-    print('Login')
+    print(f'Logging in to Fleet Server {SERVER}')
     fc = FleepCache(SERVER, c["username"], c["password"])
     print('Loading contacts')
     fc.contacts.sync_all()
+
     print('Loading conversations')
     for conv_id in fc.conversations:
         conv = fc.conversations[conv_id]
@@ -79,7 +77,7 @@ def main():
             'members': conv.members,
             'messages': [],
         }
-        mlist = conv.messages.keys()
+        mlist = list(conv.messages.keys())
         mlist.sort()
         for mnr in mlist:
             m = conv.messages[mnr]
