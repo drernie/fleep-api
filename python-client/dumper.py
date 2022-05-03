@@ -15,6 +15,7 @@ Output: history.json
 """
 SERVER = 'https://fleep.io'
 CONFIG_FILE = "~/.fleep.yml"
+OUT_PATH = "~/Downloads/fleep-history.json"
 
 import sys
 import os.path
@@ -84,11 +85,10 @@ def main():
             cdata['messages'].append(m.as_dict())
         data['conversations'][conv_id] = cdata
 
-    fn = 'history.json'
     jsdata = json_encode_stable(data)
-    with open(fn, 'w') as f:
+    with open(OUT_PATH, 'w') as f:
         f.write(jsdata)
-    print('Wrote', fn)
+    print(f'Wrote {OUT_PATH}')
 
 if __name__ == '__main__':
     main()
