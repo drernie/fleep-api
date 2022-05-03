@@ -37,7 +37,9 @@ def load_config():
     global USERNAME, PASSWORD
     cf_path = os.path.expanduser(CONFIG_FILE)
     print(cf_path)
-    cf = yaml.load(cf_path)
+    with open(cf_path, 'r') as file:
+        cf = yaml.safe_load(file)
+        print(cf)
     if not cf["login"]:
         print(f'Please create {CONFIG_FILE} with username and password.')
         sys.exit(1)
