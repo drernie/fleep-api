@@ -25,6 +25,7 @@ def find_xml_refs(xml):
 from .api import FleepApi
 
 FILE_KEY = "%s-%s"
+IGNORE_REC_TYPES=['preview','label','replace', 'my_section', 'task']
 
 #
 # --- Message ------------------------------------------------------------------------------
@@ -308,7 +309,7 @@ class Conversation(object):
 
         if m.mk_message_type and m.mk_message_type not in (
                 'sysmsg','disclose','hook','unhook','text','email','create',
-                'add','leave','topic','kick','file','signin','alerts','delfile',
+                'add','leave','topic','kick','file','signin','alerts','delfile', 'add_teamV2',
                 'add_team','kick_team','hangout','share','unshare','autojoin','autojoin_team',
                 'separator','show','unshow','no_url_previews','url_previews','bounce','replace'):
             logging.warning('Unhandled message type: %s', m.mk_message_type)
@@ -405,7 +406,7 @@ class Conversation(object):
             self.teamlist.upsert(rec)
         elif rec['mk_rec_type'] == 'file':
             self.update_file(rec)
-        elif rec['mk_rec_type'] in ['preview','label','replace', 'my_section']:
+        elif rec['mk_rec_type'] in IGNORE_REC_TYPES:
             pass # FIXME?
         else:
             logging.warning('Unhandled record type %s', rec['mk_rec_type'])
@@ -1380,7 +1381,7 @@ class FleepCache(object):
                     del self.teams.teams[rec['team_id']]
                 else:
                     self.teams.upsert(rec)
-            elif rec['mk_rec_type'] in ['preview','label','replace']:
+            elif rec['mk_rec_type'] in IGNORE_REC_TYPES:
                 pass
             else:
                 logging.warning('Unhandled record type %s', rec['mk_rec_type'])
