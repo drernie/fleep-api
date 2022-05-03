@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 """Dump Fleep chat history into JSON file.
 
@@ -35,15 +35,13 @@ CONFIG_FILE = "~/.fleep.yml"
 
 def load_config():
     global USERNAME, PASSWORD
-    cfn = os.path.expanduser(CONFIG_FILE)
-
-    if not USERNAME or not PASSWORD:
-        print(f'Please create ~/.fleep/client.ini with username and password.')
+    cf_path = os.path.expanduser(CONFIG_FILE)
+    print(cf_path)
+    cf = yaml.load(cf_path)
+    if not cf["login"]:
+        print(f'Please create {CONFIG_FILE} with username and password.')
         sys.exit(1)
-
-    if not USERNAME or not PASSWORD:
-        print('Please create ~/.fleep/client.ini with username and password.')
-        sys.exit(1)
+    return cf["login"]
 
 def json_encode_stable(data = None, **kwargs):
     """JSON with sorted keys, needed for tests.
@@ -53,10 +51,10 @@ def json_encode_stable(data = None, **kwargs):
     return e.encode(data)
 
 def main():
-    load_config()
+    c = load_config()
 
     print('Login')
-    fc = FleepCache(SERVER, USERNAME, PASSWORD)
+    fc = FleepCache(SERVER, c["username"], c["password"])
     print('Loading contacts')
     fc.contacts.sync_all()
     print('Loading conversations')
