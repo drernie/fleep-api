@@ -309,7 +309,7 @@ class Conversation(object):
         if m.mk_message_type and m.mk_message_type not in (
                 'sysmsg','disclose','hook','unhook','text','email','create',
                 'add','leave','topic','kick','file','signin','alerts','delfile',
-                'add_team','kick_team','hangout','share','unshare','autojoin',
+                'add_team','kick_team','hangout','share','unshare','autojoin','autojoin_team',
                 'separator','show','unshow','no_url_previews','url_previews','bounce','replace'):
             logging.warning('Unhandled message type: %s', m.mk_message_type)
 
@@ -405,7 +405,7 @@ class Conversation(object):
             self.teamlist.upsert(rec)
         elif rec['mk_rec_type'] == 'file':
             self.update_file(rec)
-        elif rec['mk_rec_type'] in ['preview','label','replace']:
+        elif rec['mk_rec_type'] in ['preview','label','replace', 'my_section']:
             pass # FIXME?
         else:
             logging.warning('Unhandled record type %s', rec['mk_rec_type'])
@@ -1052,7 +1052,8 @@ class ContactList(object):
         """Send all uuid's you have to server and let server return you all you are missing
             also sets's internal event horizon so we know we are in full sync now
         """
-        res = self.api.contact_sync_all(self.contacts.keys())
+        keys = list(self.contacts.keys())
+        res = self.api.contact_sync_all(keys)
         for a in res['contacts']:
             self.emails[a['email']] = self.contacts[a['account_id']] = a
         self.fully_synced = True
